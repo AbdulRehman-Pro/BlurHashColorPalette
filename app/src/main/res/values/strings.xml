@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BlurHash</string>
+    <string name="fullscreen_blurred_image">Fullscreen Blurred Image</string>
+    <string name="main_image">Main Image</string>
+    <string name="image_add_description">Tap (+) to pick from the gallery, and the blurred background updates dynamically.</string>
+    <string name="image_added_description">Extracts vibrant colors scheme from images to dynamically style card background and text.</string>
+</resources>
