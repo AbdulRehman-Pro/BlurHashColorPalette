@@ -1,3 +1,5 @@
+[![Android APK Build and Release](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml)
+
 # BlurHash Color Palette
 
 This Android application implements an image picker with BlurHash encoding, allowing users to select images, generate their BlurHash representation, and display them in a ViewPager2 with a smooth transformation effect.
