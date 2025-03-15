@@ -7,17 +7,27 @@ android {
     namespace = "com.rehman.blurhash"
     compileSdk = 35
 
+
+
     defaultConfig {
         applicationId = "com.rehman.blurhash"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    
 
-
+    applicationVariants.all {
+        this.outputs
+            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+            .forEach { output ->
+                val variant = this.buildType.name
+                val apkName = "BlurHash-${this.versionName}-$variant.apk"
+                output.outputFileName = apkName
+            }
+    }
 
     signingConfigs {
         create("release") {
@@ -25,6 +35,7 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD")
             keyAlias = System.getenv("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD")
+
         }
     }
 
@@ -38,8 +49,11 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+
         }
     }
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
