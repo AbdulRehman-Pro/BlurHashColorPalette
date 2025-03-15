@@ -21,8 +21,8 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release-key.jks
-          mv release-key.jks release-key.jks
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
+          mv keystore.jks release-key.jks
 
       - name: Verify Keystore File
         run: ls -la android/app/release-key.jks
