@@ -3,11 +3,10 @@ name: Android APK Build and Release
 on:
   push:
     branches:
-      - main  # Change to your release branch
+      - main  # Change if needed
 
 jobs:
   build:
-    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
@@ -20,38 +19,33 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
+          mkdir -p android/app/keystore
+          mv keystore.jks android/app/keystore/release-key.jks
+
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleRelease
+      - name: Build Signed APK
+        run: |
+          export KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          export KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          export KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          ./gradlew assembleRelease
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
 
-  release:
-    name: Create GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download APK Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release-apk
-          path: app/build/outputs/apk/release/
-
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/app-release.apk
+          files: android/app/build/outputs/apk/release/app-release.apk
           tag_name: v1.0.${{ github.run_number }}
           release_name: Release v1.0.${{ github.run_number }}
-          draft: false
-          prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_PAT }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
