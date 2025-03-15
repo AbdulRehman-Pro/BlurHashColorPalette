@@ -17,7 +17,12 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    
+
+    tasks.register("printVersionName") {
+        doLast {
+            println(android.defaultConfig.versionName)
+        }
+    }
 
     applicationVariants.all {
         this.outputs
