@@ -5,7 +5,6 @@ on:
     branches:
       - main  # Change if needed
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,7 +23,7 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
           mkdir -p android/app/keystore
-          mv keystore.jks android/app/keystore/release-key.jks
+          mv keystore.jks release-key.jks
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew
@@ -34,13 +33,17 @@ jobs:
           export KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
           export KEY_ALIAS=${{ secrets.KEY_ALIAS }}
           export KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
-          ./gradlew assembleRelease
+          ./gradlew clean assembleRelease  
+
+      - name: Debug Build Output
+        run: ls -R android/app/build/outputs/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+          
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -49,4 +52,4 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           release_name: Release v1.0.${{ github.run_number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BUILD_PAT }}
