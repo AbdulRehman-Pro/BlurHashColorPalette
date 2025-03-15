@@ -63,3 +63,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
 
+      - name: Remove Source Code from Release
+        run: |
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ env.VERSION_NAME }}" | jq -r .id)
+
+          ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets" | jq -r '.[] | select(.name | endswith(".zip") or endswith(".tar.gz")) | .id')
+
+          for ASSET_ID in $ASSETS; do
+            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
+          done
+
