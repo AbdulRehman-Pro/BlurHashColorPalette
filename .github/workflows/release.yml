@@ -25,7 +25,7 @@ jobs:
           mv keystore.jks release-key.jks
 
       - name: Verify Keystore File
-        run: ls -la android/app/release-key.jks
+        run: ls -la /release-key.jks
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew
