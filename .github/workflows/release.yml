@@ -3,7 +3,7 @@ name: Android APK Build and Release
 on:
   push:
     branches:
-      - main  # Change if needed
+      - main  
 
 jobs:
   build:
@@ -21,9 +21,11 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
-          mkdir -p android/app/keystore
-          mv keystore.jks release-key.jks
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release-key.jks
+          mv release-key.jks android/app/release-key.jks
+
+      - name: Verify Keystore File
+        run: ls -la android/app/release-key.jks
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew
@@ -33,23 +35,23 @@ jobs:
           export KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
           export KEY_ALIAS=${{ secrets.KEY_ALIAS }}
           export KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
-          ./gradlew clean assembleRelease  
+          ./gradlew clean assembleRelease --stacktrace --debug  
 
       - name: Debug Build Output
-        run: ls -R android/app/build/outputs/
+        run: ls -R android/app/build/outputs/ || ls -R app/build/outputs/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          
+          path: app/build/outputs/apk/release/app-release.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/app-release.apk
           tag_name: v1.0.${{ github.run_number }}
           release_name: Release v1.0.${{ github.run_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_PAT }}
+
