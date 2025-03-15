@@ -100,11 +100,21 @@ jobs:
 
           ASSET_URL=$(echo "$RESPONSE" | jq -r .upload_url | sed "s/{?name,label}//")
 
+          APK_PATH="app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk"
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "❌ APK file not found at $APK_PATH"
+            exit 1
+          fi
+
+          echo "✅ APK found. Uploading to GitHub Release..."
+
           curl -X POST -H "Authorization: token ${{ secrets.RELEASE_PAT }}" \
             -H "Content-Type: application/vnd.android.package-archive" \
-            --data-binary "@android/app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk" \
+            --data-binary @"$APK_PATH" \
             "$ASSET_URL?name=BlurHash-${{ env.VERSION_NAME }}-release.apk"
 
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+
 
