@@ -96,6 +96,9 @@ class BlurHashActivity : AppCompatActivity() {
         binding = ActivityBlurHashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Check for update
+        Utils.checkForUpdate(this)
+
         // Initialize adapter for ViewPager2
         adapter = ImagePagerAdapter(blurHashData) {
             launcher.launch(Utils.imagePickerConfig(this))
@@ -171,6 +174,12 @@ class BlurHashActivity : AppCompatActivity() {
 
 
     }
+
+
+
+
+
+
 
 
 }

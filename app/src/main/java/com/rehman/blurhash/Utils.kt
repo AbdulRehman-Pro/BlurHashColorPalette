@@ -1,7 +1,9 @@
 package com.rehman.blurhash
 
+import android.app.AlertDialog
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -12,7 +14,10 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
+import android.util.Log
 import android.widget.ImageView
 import androidx.palette.graphics.Palette
 import com.google.gson.Gson
@@ -26,7 +31,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 object Utils {
 
@@ -96,7 +108,6 @@ object Utils {
     }
 
 
-
     fun generateBitmap(contentResolver: ContentResolver, uri: Uri): Bitmap? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) { // API 28+
             val source = ImageDecoder.createSource(contentResolver, uri)
@@ -153,6 +164,54 @@ object Utils {
 
         this.setImageDrawable(crossFade)
         crossFade.startTransition(duration.toInt()) // Start smooth transition
+    }
+
+
+    fun checkForUpdate(context: Context) {
+        val currentVersion = BuildConfig.VERSION_NAME
+        val url = "https://api.github.com/repos/AbdulRehman-Pro/BlurHashColorPalette/releases/latest"
+
+        val request = Request.Builder().url(url).build()
+        val client = OkHttpClient()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("UpdateCheck", "Failed to fetch release info", e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.body()?.string()?.let { jsonResponse ->
+                    val json = JSONObject(jsonResponse)
+                    val latestVersion = json.getString("tag_name").removePrefix("v")
+                    val apkName = json.getJSONArray("assets")
+                        .getJSONObject(0).getString("name")
+                    val downloadUrl = json.getJSONArray("assets")
+                        .getJSONObject(0).getString("browser_download_url")
+
+                    Log.d("UpdateCheck","Response: Apk Name: $apkName => Url: $downloadUrl")
+
+                    if (latestVersion > currentVersion) {
+                        showUpdateDialog(context, downloadUrl)
+                    }
+                }
+            }
+
+        })
+    }
+
+
+    private fun showUpdateDialog(context: Context, downloadUrl: String) {
+        Handler(Looper.getMainLooper()).post {
+            AlertDialog.Builder(context)
+                .setTitle("Update Available")
+                .setMessage("A new version is available. Download now?")
+                .setPositiveButton("Download") { _, _ ->
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                    context.startActivity(intent)
+                }
+                .setNegativeButton("Later", null)
+                .show()
+        }
     }
 
 

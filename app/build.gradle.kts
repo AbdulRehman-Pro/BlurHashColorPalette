@@ -14,7 +14,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -68,6 +68,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -99,9 +100,11 @@ dependencies {
     // Color Palette
     implementation(libs.androidx.palette.ktx)
 
-
     // Blur Hash
     implementation(libs.vanniktech.blurhash)
+
+    // Retrofit for API Calls
+    implementation(libs.retrofit)
 
 
 }
