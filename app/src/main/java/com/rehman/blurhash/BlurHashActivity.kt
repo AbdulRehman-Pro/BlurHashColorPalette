@@ -1,5 +1,6 @@
 package com.rehman.blurhash
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -27,6 +28,7 @@ import kotlin.math.abs
 class BlurHashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityBlurHashBinding
+    private lateinit var updateManager: UpdateManager
     private lateinit var adapter: ImagePagerAdapter
     private var blurHashData = mutableListOf<BlurHashData>()
 
@@ -86,6 +88,11 @@ class BlurHashActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        updateManager.handlePermissionResult(requestCode, resultCode)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
@@ -97,7 +104,8 @@ class BlurHashActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Check for update
-        Utils.checkForUpdate(this)
+        updateManager = UpdateManager(this, this)
+        updateManager.checkForUpdate()
 
         // Initialize adapter for ViewPager2
         adapter = ImagePagerAdapter(blurHashData) {
