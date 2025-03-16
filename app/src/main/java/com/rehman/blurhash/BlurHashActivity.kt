@@ -3,6 +3,7 @@ package com.rehman.blurhash
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -102,6 +103,9 @@ class BlurHashActivity : AppCompatActivity() {
         )
         binding = ActivityBlurHashBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val intent = Intent(Settings.ACTION_HOME_SETTINGS)
+        startActivity(intent)
 
         // Check for update
         updateManager = UpdateManager(this, this)
