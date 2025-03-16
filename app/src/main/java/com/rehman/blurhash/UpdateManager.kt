@@ -28,6 +28,9 @@ class UpdateManager(private val context: Context, private val activity: Activity
         private const val INSTALL_PERMISSION_REQUEST_CODE = 1234
     }
 
+    private var pendingApkPath: String? = null
+
+
     fun checkForUpdate() {
         val currentVersion = BuildConfig.VERSION_NAME
         val url =
@@ -42,29 +45,36 @@ class UpdateManager(private val context: Context, private val activity: Activity
             }
 
             override fun onResponse(call: Call, response: Response) {
-                response.body()?.string()?.let { jsonResponse ->
-                    val json = JSONObject(jsonResponse)
-                    val latestVersion = json.getString("tag_name").removePrefix("v")
-                    val apkName = json.getJSONArray("assets")
-                        .getJSONObject(0).getString("name")
-                    val downloadUrl = json.getJSONArray("assets")
-                        .getJSONObject(0).getString("browser_download_url")
+                if (response.isSuccessful) {
+                    response.body()?.string()?.let { jsonResponse ->
+                        val json = JSONObject(jsonResponse)
+                        val latestVersion = json.getString("tag_name").removePrefix("v")
+                        val apkName = json.getJSONArray("assets")
+                            .getJSONObject(0).getString("name")
+                        val downloadUrl = json.getJSONArray("assets")
+                            .getJSONObject(0).getString("browser_download_url")
 
-                    Log.d("UpdateCheck", "Apk Name: $apkName => Url: $downloadUrl")
-                    Log.d(
-                        "UpdateCheck",
-                        "Latest Version: $latestVersion => Current Version: $currentVersion"
-                    )
+                        Log.d("UpdateCheck", "Apk Name: $apkName => Url: $downloadUrl")
+                        Log.d(
+                            "UpdateCheck",
+                            "Latest Version: $latestVersion => Current Version: $currentVersion"
+                        )
 
-                    if (latestVersion > currentVersion) {
-                        downloadAndInstall(apkName, downloadUrl)
+                        if (latestVersion > currentVersion) {
+                            downloadAndInstall(apkName, downloadUrl)
+                        }
                     }
+                } else {
+                    Log.e(
+                        "UpdateCheck",
+                        "Failed to fetch release info :${response.code()} - ${response.message()}"
+                    )
                 }
             }
         })
     }
 
-    fun checkInstallPermission(): Boolean {
+    private fun checkInstallPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.packageManager.canRequestPackageInstalls()
         } else {
@@ -72,7 +82,8 @@ class UpdateManager(private val context: Context, private val activity: Activity
         }
     }
 
-    fun requestInstallPermission() {
+    private fun requestInstallPermission(apkPath: String) {
+        pendingApkPath = apkPath // Store the APK path
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                 data = Uri.parse("package:${context.packageName}")
@@ -83,12 +94,13 @@ class UpdateManager(private val context: Context, private val activity: Activity
 
     fun downloadAndInstall(apkName: String, apkUrl: String) {
 
-        val destination = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/$apkName"
+        val destination =
+            "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/$apkName"
 
         val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
             setTitle("Downloading Update")
             setDescription("Downloading new version...")
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)
             setDestinationUri(Uri.fromFile(File(destination)))
         }
 
@@ -118,9 +130,11 @@ class UpdateManager(private val context: Context, private val activity: Activity
 
     }
 
+
     fun installApk(apkPath: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !checkInstallPermission()) {
-            requestInstallPermission()
+            requestInstallPermission(apkPath)
+
             return
         }
 
@@ -139,10 +153,14 @@ class UpdateManager(private val context: Context, private val activity: Activity
         context.startActivity(installIntent)
     }
 
-    fun handlePermissionResult(requestCode: Int, resultCode: Int) {
+    fun handlePermissionResult(requestCode: Int) {
         if (requestCode == INSTALL_PERMISSION_REQUEST_CODE) {
             if (checkInstallPermission()) {
                 Log.d("InstallAPK", "Permission granted, retrying installation...")
+                pendingApkPath?.let {
+                    installApk(it) // Retry installation
+                    pendingApkPath = null // Clear pending path
+                }
             } else {
                 Toast.makeText(
                     context,

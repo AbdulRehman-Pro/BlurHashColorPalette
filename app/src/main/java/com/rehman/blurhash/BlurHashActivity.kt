@@ -90,7 +90,7 @@ class BlurHashActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        updateManager.handlePermissionResult(requestCode, resultCode)
+        updateManager.handlePermissionResult(requestCode)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

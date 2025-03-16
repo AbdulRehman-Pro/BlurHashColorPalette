@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,8 +15,8 @@ android {
         applicationId = "com.rehman.blurhash"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 3
+        versionName = "3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,7 +28,7 @@ android {
 
     applicationVariants.all {
         this.outputs
-            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+            .map { it as ApkVariantOutputImpl }
             .forEach { output ->
                 val variant = this.buildType.name
                 val apkName = "BlurHash-${this.versionName}-$variant.apk"
