@@ -77,18 +77,16 @@ jobs:
       #     done
       - name: Create GitHub Release Manually (No Source Code)
         run: |
-          # Extract version name from your app's build.gradle
-          VERSION_NAME=$(grep "versionName" android/app/build.gradle | awk '{print $2}' | tr -d '"')
 
-          echo "Version Name: $VERSION_NAME"
+          echo "Version Name: $${{ env.VERSION_NAME }}"
 
           RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ secrets.RELEASE_PAT }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Content-Type: application/json" \
             "https://api.github.com/repos/${{ github.repository }}/releases" \
             -d "{
-              \"tag_name\": \"v$VERSION_NAME\",
-              \"name\": \"Release v$VERSION_NAME\",
+              \"tag_name\": \"v${{ env.VERSION_NAME }}\",
+              \"name\": \"Release v${{ env.VERSION_NAME }}\",
               \"body\": \"New release with APK\",
               \"draft\": false,
               \"prerelease\": false
@@ -105,7 +103,7 @@ jobs:
 
           ASSET_URL=$(echo "$RESPONSE" | jq -r .upload_url | sed "s/{?name,label}//")
 
-          APK_PATH="android/app/build/outputs/apk/release/BlurHash-$VERSION_NAME-release.apk"
+          APK_PATH="android/app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk"
 
           if [ ! -f "$APK_PATH" ]; then
             echo "❌ APK file not found at $APK_PATH"
@@ -117,7 +115,7 @@ jobs:
           curl -X POST -H "Authorization: Bearer ${{ secrets.RELEASE_PAT }}" \
             -H "Content-Type: application/vnd.android.package-archive" \
             --data-binary @"$APK_PATH" \
-            "$ASSET_URL?name=BlurHash-$VERSION_NAME-release.apk"
+            "$ASSET_URL?name=BlurHash-${{ env.VERSION_NAME }}-release.apk"
 
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
