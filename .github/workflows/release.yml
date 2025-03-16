@@ -19,7 +19,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 🏎️ Cache Gradle dependencies to speed up builds
       - name: Cache Gradle Dependencies
         uses: actions/cache@v3
         with:
@@ -30,7 +29,6 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      # 🏎️ Cache Android build outputs to speed up incremental builds
       - name: Cache Android Build
         uses: actions/cache@v3
         with:
@@ -74,7 +72,7 @@ jobs:
         with:
           files: app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk
           tag_name: v${{ env.VERSION_NAME }}
-          release_name: Release v${{ env.VERSION_NAME }}
+          name: Release v${{ env.VERSION_NAME }}
           draft: false
           prerelease: false
           generate_release_notes: false
