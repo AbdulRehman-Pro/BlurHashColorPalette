@@ -1,5 +1,6 @@
 [![Android APK Build and Release](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml)
-[![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/releases)
+[![Latest release](https://badgen.net/github/release/Naereen/Strapdown.js)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/releases)
+
 
 ![Android Studio](https://img.shields.io/badge/android%20studio-346ac1?style=for-the-badge&logo=android%20studio&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
