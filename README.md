@@ -1,5 +1,12 @@
 [![Android APK Build and Release](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://github.com/AbdulRehman-Pro/BlurHashColorPalette/releases)
 
+![Android Studio](https://img.shields.io/badge/android%20studio-346ac1?style=for-the-badge&logo=android%20studio&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
+![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
+![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 # BlurHash Color Palette
 
 This Android application implements an image picker with BlurHash encoding, allowing users to select images, generate their BlurHash representation, and display them in a ViewPager2 with a smooth transformation effect.
