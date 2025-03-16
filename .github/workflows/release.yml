@@ -19,6 +19,26 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # 🏎️ Cache Gradle dependencies to speed up builds
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # 🏎️ Cache Android build outputs to speed up incremental builds
+      - name: Cache Android Build
+        uses: actions/cache@v3
+        with:
+          path: app/build
+          key: build-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
