@@ -49,73 +49,16 @@ jobs:
           name: release-apk
           path: app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk
 
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     files: app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk
-      #     tag_name: v${{ env.VERSION_NAME }}
-      #     release_name: Release v${{ env.VERSION_NAME }}
-      #     draft: false
-      #     prerelease: false
-      #     generate_release_notes: false
-      #     make_latest: true
-      #     repository: ${{ github.repository }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
-
-      # - name: Remove Source Code from Release
-      #   run: |
-      #     RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-      #       "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ env.VERSION_NAME }}" | jq -r .id)
-
-      #     ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-      #       "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets" | jq -r '.[] | select(.name | endswith(".zip") or endswith(".tar.gz")) | .id')
-
-      #     for ASSET_ID in $ASSETS; do
-      #       curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-      #         "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
-      #     done
-      - name: Create GitHub Release Manually (No Source Code)
-        run: |
-
-          echo "Version Name: $${{ env.VERSION_NAME }}"
-
-          RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ secrets.RELEASE_PAT }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases" \
-            -d "{
-              \"tag_name\": \"v${{ env.VERSION_NAME }}\",
-              \"name\": \"Release v${{ env.VERSION_NAME }}\",
-              \"body\": \"New release with APK\",
-              \"draft\": false,
-              \"prerelease\": false
-            }")
-
-          RELEASE_ID=$(echo "$RESPONSE" | jq -r .id)
-
-          if [[ "$RELEASE_ID" == "null" ]]; then
-            echo "❌ Failed to create release: $RESPONSE"
-            exit 1
-          fi
-
-          echo "✅ Release created with ID: $RELEASE_ID"
-
-          ASSET_URL=$(echo "$RESPONSE" | jq -r .upload_url | sed "s/{?name,label}//")
-
-          APK_PATH="android/app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk"
-
-          if [ ! -f "$APK_PATH" ]; then
-            echo "❌ APK file not found at $APK_PATH"
-            exit 1
-          fi
-
-          echo "✅ APK found. Uploading to GitHub Release..."
-
-          curl -X POST -H "Authorization: Bearer ${{ secrets.RELEASE_PAT }}" \
-            -H "Content-Type: application/vnd.android.package-archive" \
-            --data-binary @"$APK_PATH" \
-            "$ASSET_URL?name=BlurHash-${{ env.VERSION_NAME }}-release.apk"
-
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/BlurHash-${{ env.VERSION_NAME }}-release.apk
+          tag_name: v${{ env.VERSION_NAME }}
+          release_name: Release v${{ env.VERSION_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          make_latest: true
+          repository: ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
