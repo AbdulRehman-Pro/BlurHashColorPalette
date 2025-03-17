@@ -40,10 +40,10 @@ jobs:
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
-          mv keystore.jks release-key.jks
+          # mv keystore.jks release-key.jks
 
       - name: Verify Keystore File
-        run: ls -la release-key.jks
+        run: ls -la keystore.jks
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x gradlew
