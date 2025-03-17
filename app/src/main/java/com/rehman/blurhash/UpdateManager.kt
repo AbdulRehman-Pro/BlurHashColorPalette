@@ -1,6 +1,7 @@
 package com.rehman.blurhash
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,6 +10,8 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -61,7 +64,7 @@ class UpdateManager(private val context: Context, private val activity: Activity
                         )
 
                         if (latestVersion > currentVersion) {
-                            downloadAndInstall(apkName, downloadUrl)
+                            showUpdateDialog(context, apkName, downloadUrl)
                         }
                     }
                 } else {
@@ -92,7 +95,20 @@ class UpdateManager(private val context: Context, private val activity: Activity
         }
     }
 
-    fun downloadAndInstall(apkName: String, apkUrl: String) {
+    private fun showUpdateDialog(context: Context, apkName: String, downloadUrl: String) {
+        Handler(Looper.getMainLooper()).post {
+            AlertDialog.Builder(context)
+                .setTitle("Update Available")
+                .setMessage("A new version is available. Download now?")
+                .setPositiveButton("Download") { _, _ ->
+                    downloadAndInstall(apkName, downloadUrl)
+                }
+                .setNegativeButton("Later", null)
+                .show()
+        }
+    }
+
+    private fun downloadAndInstall(apkName: String, apkUrl: String) {
 
         val destination =
             "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/$apkName"
@@ -134,7 +150,6 @@ class UpdateManager(private val context: Context, private val activity: Activity
     fun installApk(apkPath: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !checkInstallPermission()) {
             requestInstallPermission(apkPath)
-
             return
         }
 
