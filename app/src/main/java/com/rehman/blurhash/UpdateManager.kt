@@ -112,6 +112,16 @@ class UpdateManager(private val context: Context) {
         val destination =
             "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/$apkName"
 
+        val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
+            setTitle("Downloading Update")
+            setDescription("Downloading new version...")
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)
+            setDestinationUri(Uri.fromFile(File(destination)))
+        }
+
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent?.action) {
