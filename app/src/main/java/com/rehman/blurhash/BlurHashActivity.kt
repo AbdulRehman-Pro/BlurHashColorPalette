@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -88,10 +89,10 @@ class BlurHashActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        updateManager.handlePermissionResult(requestCode)
-    }
+    private val installPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            updateManager.handlePermissionResult()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,8 +106,10 @@ class BlurHashActivity : AppCompatActivity() {
 
 
         // Check for update
-        updateManager = UpdateManager(this, this)
+        updateManager = UpdateManager(this)
         updateManager.checkForUpdate()
+        updateManager.setPermissionLauncher(installPermissionLauncher)
+
 
         // Initialize adapter for ViewPager2
         adapter = ImagePagerAdapter(blurHashData) {

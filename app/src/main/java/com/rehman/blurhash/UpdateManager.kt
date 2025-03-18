@@ -1,6 +1,5 @@
 package com.rehman.blurhash
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
@@ -15,6 +14,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.FileProvider
 import okhttp3.Call
 import okhttp3.Callback
@@ -25,14 +25,13 @@ import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 
-class UpdateManager(private val context: Context, private val activity: Activity) {
-
-    companion object {
-        private const val INSTALL_PERMISSION_REQUEST_CODE = 1234
-    }
+class UpdateManager(private val context: Context) {
 
     private var pendingApkPath: String? = null
-
+    private var installPermissionLauncher: ActivityResultLauncher<Intent>? = null
+    fun setPermissionLauncher(launcher: ActivityResultLauncher<Intent>) {
+        installPermissionLauncher = launcher
+    }
 
     fun checkForUpdate() {
         val currentVersion = BuildConfig.VERSION_NAME
@@ -91,7 +90,7 @@ class UpdateManager(private val context: Context, private val activity: Activity
             val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                 data = Uri.parse("package:${context.packageName}")
             }
-            activity.startActivityForResult(intent, INSTALL_PERMISSION_REQUEST_CODE)
+            installPermissionLauncher?.launch(intent)
         }
     }
 
@@ -121,7 +120,6 @@ class UpdateManager(private val context: Context, private val activity: Activity
         }
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadId = downloadManager.enqueue(request)
 
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -168,21 +166,20 @@ class UpdateManager(private val context: Context, private val activity: Activity
         context.startActivity(installIntent)
     }
 
-    fun handlePermissionResult(requestCode: Int) {
-        if (requestCode == INSTALL_PERMISSION_REQUEST_CODE) {
-            if (checkInstallPermission()) {
-                Log.d("InstallAPK", "Permission granted, retrying installation...")
-                pendingApkPath?.let {
-                    installApk(it) // Retry installation
-                    pendingApkPath = null // Clear pending path
-                }
-            } else {
-                Toast.makeText(
-                    context,
-                    "Permission denied! Enable manually in settings.",
-                    Toast.LENGTH_LONG
-                ).show()
+    fun handlePermissionResult() {
+        if (checkInstallPermission()) {
+            Log.d("InstallAPK", "Permission granted, retrying installation...")
+            pendingApkPath?.let {
+                installApk(it) // Retry installation
+                pendingApkPath = null // Clear pending path
             }
+        } else {
+            Toast.makeText(
+                context,
+                "Permission denied! Enable manually in settings.",
+                Toast.LENGTH_LONG
+            ).show()
         }
+
     }
 }
